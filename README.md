@@ -16,7 +16,7 @@ BLE
 К плате подключены:
 
 * RGB-светодиод (встроенный);
-* DytRGB-светодиод (встроенный);
+* Внешние светодиоды на GPIO;
 * кнопка (GPIO_47);
 * генератор сигнала на вход ADC.
 
@@ -31,3 +31,5 @@ idf.py menuconfig
 idf.py build
 idf.py -p COMx flash monitor
 ```
+## Распиновка дефкита
+![Распиновка дефкита](doc/yd-esp32-s3-devkitc-1-clone-pinout.jpg)
