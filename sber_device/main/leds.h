@@ -9,6 +9,17 @@
 #define CONFIG_GPIO_LED_RED     5
 #define CONFIG_GPIO_LED_BLUE    6
 
+// Автомат состояний светодиода
+typedef enum {
+    LED_INIT,
+    LED_IDLE,
+    LED_MEASURING,
+    LED_WIFI_CONNECTING,
+    LED_UPLOADING,
+    LED_OTA_CHECKING_UPDATING,
+    LED_ERROR
+} led_fst_state_t;
+
 // Инициализация светодиодов
 void leds_init();
 
@@ -29,5 +40,8 @@ void led_blue_off();
 
 // Установить яркость адресного светодиода
 void leds_rgb_setup(uint32_t r, uint32_t g, uint32_t b);
+
+// Установить состояние системы для отображения светодиодами
+void leds_set_state(led_fst_state_t state);
 
 #endif //_LEDS_H_

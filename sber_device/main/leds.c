@@ -1,10 +1,19 @@
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "esp_log.h"
 #include "driver/gpio.h"
+
 #include "led_strip.h"
 #include "leds.h"
 
+static const char *TAG = "leds";
+
 // Переменная работы с адресным светодиодом
 static led_strip_handle_t led_strip;
+
+static void leds_task(void *arg);
 
 // Настройка GPIO для светодиодов
 void configure_gpio_led()
@@ -84,6 +93,9 @@ void leds_init()
 {
     configure_gpio_led();
     configure_leds();
+
+    // Запускаем задачу отображения состояния светодиодами
+    xTaskCreate( leds_task, "btn_task", 2048, nullptr, 5 /* приоритет */, nullptr);
 }
 
 // Установить яркость адресного светодиода
@@ -91,4 +103,24 @@ void leds_rgb_setup(uint32_t r, uint32_t g, uint32_t b)
 {
     led_strip_set_pixel(led_strip, 0, r, g, b);
     led_strip_refresh(led_strip);
+}
+
+// Установить состояние системы для отображения светодиодами
+void leds_set_state(led_fst_state_t state)
+{
+
+}
+
+
+
+// Задача отображения состояния системы светодиодами
+static void leds_task(void *arg)
+{
+    ESP_LOGI(TAG, "Leds task started");
+
+    while (1)
+    {
+
+        vTaskDelay(pdMS_TO_TICKS(10));  // шаг опроса 10 мс
+    }
 }

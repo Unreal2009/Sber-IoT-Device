@@ -31,14 +31,13 @@ void button_init()
     gpio_set_direction(BTN_PIN, GPIO_MODE_INPUT);
     gpio_set_pull_mode(BTN_PIN, GPIO_PULLUP_ONLY);
 
-    // Создаём очередь: 3 элемента, размер каждого = sizeof(btn_event_t)
-    btn_queue = xQueueCreate(3, sizeof(btn_event_t));
+    // Создаём очередь: 1 элемент, размер каждого = sizeof(btn_event_t)
+    // Можно сделать на мютексах или крит.секциях - но хочу сделать так,
+    // чтобы была дальше возможность масштабирования при необходимости
+    btn_queue = xQueueCreate(1, sizeof(btn_event_t));
 
-    // Запускаем задачу пороса кнопки
-    xTaskCreate( button_task, "btn_task", 2048, nullptr,
-        5,              // приоритет
-        nullptr
-        );
+    // Запускаем задачу опроса кнопки
+    xTaskCreate( button_task, "btn_task", 2048, nullptr, 5 /* приоритет */, nullptr);
 }
 
 // Получить текущее состояние пина кнопки
