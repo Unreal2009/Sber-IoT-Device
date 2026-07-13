@@ -17,4 +17,10 @@ void app_main(void)
     key_init();
 
     printf("Firmware version: %s\n", firmware_version);
+
+    led_red_on();
+    led_green_on();
+    led_blue_on();
+
+    leds_rgb_setup(100, 100, 100);
 }
