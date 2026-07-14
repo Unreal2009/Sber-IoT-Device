@@ -8,7 +8,16 @@
 #include "led_strip.h"
 #include "leds.h"
 
+#define LED_BLINK_TIME_MS   pdMS_TO_TICKS(500)
+
 static const char *TAG = "leds";
+
+// Тут храним время для мигания и текущее состояние светодиода
+static uint32_t last_blink = 0;
+static uint32_t current_state = 0;
+
+// Тут будем хранить текущее состояние системы для отображения светодиодами
+static led_fsm_state_t current_fsm_state = LED_INIT;
 
 // Переменная работы с адресным светодиодом
 static led_strip_handle_t led_strip;
@@ -105,13 +114,53 @@ void leds_rgb_setup(uint32_t r, uint32_t g, uint32_t b)
     led_strip_refresh(led_strip);
 }
 
-// Установить состояние системы для отображения светодиодами
-void leds_set_state(led_fst_state_t state)
+// Красный цвет адресного светодиода
+void led_strip_red()
 {
-
+    led_strip_set_pixel(led_strip, 0, 255, 0, 0);
+    led_strip_refresh(led_strip);
 }
 
+// Зеленый цвет адресного светодиода
+void led_strip_green()
+{
+    led_strip_set_pixel(led_strip, 0, 0, 255, 0);
+    led_strip_refresh(led_strip);
+}
 
+// Голубой цвет адресного светодиода
+void led_strip_blue()
+{
+    led_strip_set_pixel(led_strip, 0, 0, 0, 255);
+    led_strip_refresh(led_strip);
+}
+
+// Желтый цвет адресного светодиода
+void led_strip_yellow()
+{
+    led_strip_set_pixel(led_strip, 0, 255, 255, 0);
+    led_strip_refresh(led_strip);
+}
+
+// Желтый цвет адресного светодиода
+void led_strip_off()
+{
+    led_strip_set_pixel(led_strip, 0, 0, 0, 0);
+    led_strip_refresh(led_strip);
+}
+
+// Установить состояние системы для отображения светодиодами
+void leds_set_fsm_state(led_fsm_state_t state)
+{
+    portMUX_TYPE my_lock = portMUX_INITIALIZER_UNLOCKED;
+    portENTER_CRITICAL(&my_lock);
+
+    current_fsm_state = state;
+    last_blink = xTaskGetTickCount();
+    current_state = 0;
+
+    portEXIT_CRITICAL(&my_lock);
+}
 
 // Задача отображения состояния системы светодиодами
 static void leds_task(void *arg)
@@ -120,7 +169,65 @@ static void leds_task(void *arg)
 
     while (1)
     {
-
+        switch (current_fsm_state)
+        {
+            case LED_INIT:
+                if (last_blink < xTaskGetTickCount())
+                {
+                    last_blink = xTaskGetTickCount() + LED_BLINK_TIME_MS;
+                    current_state = !current_state;
+                    if (current_state)
+                        led_strip_green();
+                    else
+                        led_strip_off();
+                }
+                break;
+            case LED_IDLE:
+                led_strip_green();
+                break;
+            case LED_MEASURING:
+                if (last_blink < xTaskGetTickCount())
+                {
+                    last_blink = xTaskGetTickCount() + LED_BLINK_TIME_MS;
+                    current_state = !current_state;
+                    if (current_state)
+                        led_strip_blue();
+                    else
+                        led_strip_off();
+                }
+                break;
+            case LED_WIFI_CONNECTING:
+                led_strip_blue();
+                break;
+            case LED_UPLOADING:
+                if (last_blink < xTaskGetTickCount())
+                {
+                    last_blink = xTaskGetTickCount() + LED_BLINK_TIME_MS;
+                    current_state = !current_state;
+                    if (current_state)
+                        led_strip_yellow();
+                    else
+                        led_strip_off();
+                }
+                break;
+            case LED_OTA_CHECKING_UPDATING:
+                led_strip_yellow();
+                break;
+            case LED_ERROR:
+                if (last_blink < xTaskGetTickCount())
+                {
+                    last_blink = xTaskGetTickCount() + LED_BLINK_TIME_MS;
+                    current_state = !current_state;
+                    if (current_state)
+                        led_strip_red();
+                    else
+                        led_strip_off();
+                }
+                break;
+            default:
+                led_strip_off();
+                break;
+        }
         vTaskDelay(pdMS_TO_TICKS(10));  // шаг опроса 10 мс
     }
 }
