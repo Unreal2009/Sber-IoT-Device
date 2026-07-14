@@ -62,11 +62,15 @@ void app_main(void)
                 break;
 
             case FSM_MEASURING :
-                for (int i = 0; i < 300; i++)
+                for (int i = 0; i < 1000; i++)
                 {
                     vTaskDelay(pdMS_TO_TICKS(10));
                     event = button_get_press();
-                    if (event == BTN_EVENT_SHORT) break;
+                    if (event == BTN_EVENT_SHORT)
+                    {
+                        ESP_LOGI(TAG, "Measure stoped by user");
+                        break;
+                    }
                 }
                 fsm_set_state(FSM_WIFI_CONNECTING);
                 break;
