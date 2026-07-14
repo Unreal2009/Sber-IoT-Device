@@ -17,7 +17,7 @@ static uint32_t last_blink = 0;
 static uint32_t current_state = 0;
 
 // Тут будем хранить текущее состояние системы для отображения светодиодами
-static led_fsm_state_t current_fsm_state = LED_INIT;
+static volatile led_fsm_state_t current_fsm_state = LED_INIT;
 
 // Переменная работы с адресным светодиодом
 static led_strip_handle_t led_strip;
@@ -224,6 +224,7 @@ static void leds_task(void *arg)
                         led_strip_off();
                 }
                 break;
+            case LED_UNDEFINED:
             default:
                 led_strip_off();
                 break;

@@ -17,7 +17,8 @@ typedef enum {
     LED_WIFI_CONNECTING,
     LED_UPLOADING,
     LED_OTA_CHECKING_UPDATING,
-    LED_ERROR
+    LED_ERROR,
+    LED_UNDEFINED
 } led_fsm_state_t;
 
 // Инициализация светодиодов

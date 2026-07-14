@@ -117,11 +117,11 @@ static void button_task(void *arg)
                 btn_event_t event = BTN_EVENT_NONE;
                 if (press_duration_ms >= LONG_PRESS_THRESHOLD_MS)
                 {
-                    // ESP_LOGI(TAG, "Button long press (duration: %lu ms)", press_duration_ms);
+                    ESP_LOGI(TAG, "Button long press (duration: %lu ms)", press_duration_ms);
                     event = BTN_EVENT_LONG;
                 } else
                 {
-                    // ESP_LOGI(TAG, "Button short press (duration: %lu ms)", press_duration_ms);
+                    ESP_LOGI(TAG, "Button short press (duration: %lu ms)", press_duration_ms);
                     event = BTN_EVENT_SHORT;
                 }
                 // Чистим очередь и кладем туда тип нажатие кнопки

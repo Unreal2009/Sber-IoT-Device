@@ -11,131 +11,90 @@
 
 #include "button.h"
 #include "leds.h"
+#include "fsm.h"
 
 static const char *TAG = "example_sber_device";
 
-// Время мигания светодиодов
-#define CONFIG_BLINK_PERIOD 1000
-
 static const char firmware_version[] = "1.0.0";
 
-
-static void blink_led(uint8_t led_color)
+void show_init()
 {
-    leds_off();
+    ESP_LOGI(TAG, "SYSTEM START");
 
-    switch (led_color)
-    {
-        case 0 :
-            ESP_LOGI(TAG, "Turning the LED RED ON");
-            // if (button_get_state() == 0) led_red_on();
-            leds_rgb_setup(255, 0, 0);
-            break;
-
-        case 1 :
-            ESP_LOGI(TAG, "Turning the LED GREEN ON");
-            // if (button_get_state() == 0) led_green_on();
-            leds_rgb_setup(0, 255, 0);
-            break;
-        case 2 :
-            ESP_LOGI(TAG, "Turning the LED BLUE ON");
-            // if (button_get_state() == 0) led_blue_on();
-            leds_rgb_setup(0, 0, 255);
-            break;
-        default:
-            leds_off();
-            break;
-    }
-}
-
-// Вспомогательная переменная и ф-ция для отладкт
-led_fsm_state_t current_fsm_state = LED_INIT;
-
-led_fsm_state_t get_next_fsm_state()
-{
-    switch (current_fsm_state)
-    {
-        case LED_INIT :
-            current_fsm_state = LED_IDLE;
-            ESP_LOGI(TAG, "LED_IDLE");
-            break;
-        case LED_IDLE :
-            current_fsm_state = LED_MEASURING;
-            ESP_LOGI(TAG, "LED_MEASURING");
-            break;
-        case LED_MEASURING :
-            current_fsm_state = LED_WIFI_CONNECTING;
-            ESP_LOGI(TAG, "LED_WIFI_CONNECTING");
-            break;
-        case LED_WIFI_CONNECTING :
-            current_fsm_state = LED_UPLOADING;
-            ESP_LOGI(TAG, "LED_UPLOADING");
-            break;
-        case LED_UPLOADING :
-            current_fsm_state = LED_OTA_CHECKING_UPDATING;
-            ESP_LOGI(TAG, "LED_OTA_CHECKING_UPDATING");
-            break;
-        case LED_OTA_CHECKING_UPDATING :
-            current_fsm_state = LED_ERROR;
-            ESP_LOGI(TAG, "LED_ERROR    ");
-            break;
-        case LED_ERROR :
-            current_fsm_state = LED_INIT;
-            ESP_LOGI(TAG, "LED_ERROR    ");
-            break;
-        default :
-            current_fsm_state = LED_IDLE;
-            break;
-    }
-    return current_fsm_state;
+    // Выводим версию прошивки девайса
+    ESP_LOGI(TAG, "Firmware version: %s", firmware_version);
 }
 
 void app_main(void)
 {
-    static uint8_t s_led_color = 0;
-
-    // Выводим версию прошивки девайса
-    printf("Firmware version: %s\n", firmware_version);
-
     // Инициализируем светодиоды
     leds_init();
+
+    // Показываем процесс инициализации
+    show_init();
 
     // Инициализация опроса кнопки
     button_init();
 
-    // while (1)
-    // {
-    //     led_strip_red();
-    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    //     led_strip_green();
-    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    //     led_strip_blue();
-    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    //     led_strip_yellow();
-    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    //     led_strip_off();
-    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    // }
+    vTaskDelay(pdMS_TO_TICKS(1000));
 
+    // Основной цикл работы
+    // Не стал выносить в отдельную задачу - пусть крутится тут
     while (1)
     {
-        // blink_led(s_led_color);
-        //
-        // s_led_color++;
-        // if (s_led_color >= 3) s_led_color = 0;
-
+        // Проверяем нажата ли кнопка
         btn_event_t event = button_get_press();
-        if (event == BTN_EVENT_SHORT)
+
+        switch (fsm_get_state())
         {
-            // Проверяем работу светодиодов
-            ESP_LOGI(TAG, "Button short press");
-            leds_set_fsm_state(get_next_fsm_state());
-        }else if (event == BTN_EVENT_LONG)
-        {
-            ESP_LOGI(TAG, "Button long press");
+            case FSM_INIT:
+                fsm_set_state(FSM_IDLE);
+                break;
+            
+            case FSM_IDLE:
+                if (event == BTN_EVENT_SHORT)
+                {
+                    fsm_set_state(FSM_MEASURING);
+                }else if (event == BTN_EVENT_LONG)
+                {
+                    fsm_set_state(FSM_OTA_CHECKING_UPDATING);
+                }
+                break;
+
+            case FSM_MEASURING :
+                for (int i = 0; i < 300; i++)
+                {
+                    vTaskDelay(pdMS_TO_TICKS(10));
+                    event = button_get_press();
+                    if (event == BTN_EVENT_SHORT) break;
+                }
+                fsm_set_state(FSM_WIFI_CONNECTING);
+                break;
+
+            case FSM_WIFI_CONNECTING :
+                vTaskDelay(pdMS_TO_TICKS(2000));
+                fsm_set_state(FSM_UPLOADING);
+                break;
+
+            case FSM_UPLOADING :
+                vTaskDelay(pdMS_TO_TICKS(3000));
+                fsm_set_state(FSM_IDLE);
+                break;
+
+            case FSM_OTA_CHECKING_UPDATING :
+                fsm_set_state(FSM_IDLE);
+                break;
+
+            case FSM_UNDEFINED :
+            case FSM_ERROR :
+                if (event == BTN_EVENT_SHORT)
+                {
+                    fsm_set_state(FSM_IDLE);
+                }
+                break;
         }
 
-        vTaskDelay(CONFIG_BLINK_PERIOD / portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 
 }
