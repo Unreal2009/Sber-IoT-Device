@@ -48,6 +48,48 @@ static void blink_led(uint8_t led_color)
     }
 }
 
+// Вспомогательная переменная и ф-ция для отладкт
+led_fsm_state_t current_fsm_state = LED_INIT;
+
+led_fsm_state_t get_next_fsm_state()
+{
+    switch (current_fsm_state)
+    {
+        case LED_INIT :
+            current_fsm_state = LED_IDLE;
+            ESP_LOGI(TAG, "LED_IDLE");
+            break;
+        case LED_IDLE :
+            current_fsm_state = LED_MEASURING;
+            ESP_LOGI(TAG, "LED_MEASURING");
+            break;
+        case LED_MEASURING :
+            current_fsm_state = LED_WIFI_CONNECTING;
+            ESP_LOGI(TAG, "LED_WIFI_CONNECTING");
+            break;
+        case LED_WIFI_CONNECTING :
+            current_fsm_state = LED_UPLOADING;
+            ESP_LOGI(TAG, "LED_UPLOADING");
+            break;
+        case LED_UPLOADING :
+            current_fsm_state = LED_OTA_CHECKING_UPDATING;
+            ESP_LOGI(TAG, "LED_OTA_CHECKING_UPDATING");
+            break;
+        case LED_OTA_CHECKING_UPDATING :
+            current_fsm_state = LED_ERROR;
+            ESP_LOGI(TAG, "LED_ERROR    ");
+            break;
+        case LED_ERROR :
+            current_fsm_state = LED_INIT;
+            ESP_LOGI(TAG, "LED_ERROR    ");
+            break;
+        default :
+            current_fsm_state = LED_IDLE;
+            break;
+    }
+    return current_fsm_state;
+}
+
 void app_main(void)
 {
     static uint8_t s_led_color = 0;
@@ -63,29 +105,31 @@ void app_main(void)
 
     // while (1)
     // {
-    //     leds_rgb_setup(255, 0, 0);
-    //     vTaskDelay(500 / portTICK_PERIOD_MS);
-    //     leds_rgb_setup(0, 255, 0);
-    //     vTaskDelay(500 / portTICK_PERIOD_MS);
-    //     leds_rgb_setup(0, 0, 255);
-    //     vTaskDelay(500 / portTICK_PERIOD_MS);
-    //     leds_rgb_setup(255, 255, 255);
-    //     vTaskDelay(500 / portTICK_PERIOD_MS);
-    //     leds_rgb_setup(0, 0, 0);
-    //     vTaskDelay(500 / portTICK_PERIOD_MS);
+    //     led_strip_red();
+    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
+    //     led_strip_green();
+    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
+    //     led_strip_blue();
+    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
+    //     led_strip_yellow();
+    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
+    //     led_strip_off();
+    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
     // }
 
     while (1)
     {
-        blink_led(s_led_color);
-
-        s_led_color++;
-        if (s_led_color >= 3) s_led_color = 0;
+        // blink_led(s_led_color);
+        //
+        // s_led_color++;
+        // if (s_led_color >= 3) s_led_color = 0;
 
         btn_event_t event = button_get_press();
         if (event == BTN_EVENT_SHORT)
         {
+            // Проверяем работу светодиодов
             ESP_LOGI(TAG, "Button short press");
+            leds_set_fsm_state(get_next_fsm_state());
         }else if (event == BTN_EVENT_LONG)
         {
             ESP_LOGI(TAG, "Button long press");

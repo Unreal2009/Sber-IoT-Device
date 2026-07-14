@@ -18,7 +18,7 @@ typedef enum {
     LED_UPLOADING,
     LED_OTA_CHECKING_UPDATING,
     LED_ERROR
-} led_fst_state_t;
+} led_fsm_state_t;
 
 // Инициализация светодиодов
 void leds_init();
@@ -41,7 +41,22 @@ void led_blue_off();
 // Установить яркость адресного светодиода
 void leds_rgb_setup(uint32_t r, uint32_t g, uint32_t b);
 
+// Красный цвет адресного светодиода
+void led_strip_red();
+
+// Зеленый цвет адресного светодиода
+void led_strip_green();
+
+// Голубой цвет адресного светодиода
+void led_strip_blue();
+
+// Желтый цвет адресного светодиода
+void led_strip_yellow();
+
+// Желтый цвет адресного светодиода
+void led_strip_off();
+
 // Установить состояние системы для отображения светодиодами
-void leds_set_state(led_fst_state_t state);
+void leds_set_fsm_state(led_fsm_state_t state);
 
 #endif //_LEDS_H_
