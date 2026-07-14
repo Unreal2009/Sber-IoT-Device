@@ -25,6 +25,48 @@ void show_init()
     ESP_LOGI(TAG, "Firmware version: %s", firmware_version);
 }
 
+// Вспомогательная переменная и ф-ция для отладкт
+led_fsm_state_t current_fsm_state = LED_INIT;
+
+led_fsm_state_t get_next_fsm_state()
+{
+    switch (current_fsm_state)
+    {
+        case LED_INIT :
+            current_fsm_state = LED_IDLE;
+            ESP_LOGI(TAG, "LED_IDLE");
+            break;
+        case LED_IDLE :
+            current_fsm_state = LED_MEASURING;
+            ESP_LOGI(TAG, "LED_MEASURING");
+            break;
+        case LED_MEASURING :
+            current_fsm_state = LED_WIFI_CONNECTING;
+            ESP_LOGI(TAG, "LED_WIFI_CONNECTING");
+            break;
+        case LED_WIFI_CONNECTING :
+            current_fsm_state = LED_UPLOADING;
+            ESP_LOGI(TAG, "LED_UPLOADING");
+            break;
+        case LED_UPLOADING :
+            current_fsm_state = LED_OTA_CHECKING_UPDATING;
+            ESP_LOGI(TAG, "LED_OTA_CHECKING_UPDATING");
+            break;
+        case LED_OTA_CHECKING_UPDATING :
+            current_fsm_state = LED_ERROR;
+            ESP_LOGI(TAG, "LED_ERROR    ");
+            break;
+        case LED_ERROR :
+            current_fsm_state = LED_INIT;
+            ESP_LOGI(TAG, "LED_ERROR    ");
+            break;
+        default :
+            current_fsm_state = LED_IDLE;
+            break;
+    }
+    return current_fsm_state;
+}
+
 void app_main(void)
 {
     // Инициализируем светодиоды
