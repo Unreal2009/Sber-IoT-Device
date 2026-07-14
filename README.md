@@ -34,3 +34,6 @@ idf.py -p COMx flash monitor
 ```
 ## Распиновка дефкита
 ![Распиновка дефкита](doc/yd-esp32-s3-devkitc-1-clone-pinout.jpg)
+
+## Вид макетной платы
+![Распиновка дефкита](doc/device.png)
