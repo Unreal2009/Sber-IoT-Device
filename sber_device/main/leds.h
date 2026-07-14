@@ -1,14 +1,6 @@
 #ifndef _LEDS_H_
 #define _LEDS_H_
 
-// Штатный светодиод на плате DevKit
-#define BLINK_GPIO              48
-
-// Внешние светодиоды - поставил, какие нашел в закромах
-#define CONFIG_GPIO_LED_GREEN   4
-#define CONFIG_GPIO_LED_RED     5
-#define CONFIG_GPIO_LED_BLUE    6
-
 // Автомат состояний светодиода
 typedef enum {
     LED_INIT,

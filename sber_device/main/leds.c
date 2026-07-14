@@ -8,6 +8,15 @@
 #include "led_strip.h"
 #include "leds.h"
 
+// --- Конфигурация ---
+// Штатный светодиод на плате DevKit
+#define BLINK_GPIO              48
+
+// Внешние светодиоды - поставил, какие нашел в закромах для отладки
+#define CONFIG_GPIO_LED_GREEN   4
+#define CONFIG_GPIO_LED_RED     5
+#define CONFIG_GPIO_LED_BLUE    6
+
 #define LED_BLINK_TIME_MS   pdMS_TO_TICKS(500)
 
 static const char *TAG = "leds";

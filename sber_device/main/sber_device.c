@@ -1,6 +1,6 @@
 /*
- * Прошивка для тестирования аппратной части - подключенных светодидов, кнопки и работы с адресным светодиодом
- */
+ * Проект на базе ESP32-S3 + FreeRTOS для получения данных с АЦП и передачи их на сервер
+*/
 
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
@@ -12,6 +12,7 @@
 #include "button.h"
 #include "leds.h"
 #include "fsm.h"
+#include "measuring.h"
 
 static const char *TAG = "example_sber_device";
 
@@ -27,6 +28,13 @@ void show_init()
 
 void app_main(void)
 {
+    measuring_init();
+
+    while (1)
+    {
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+
     // Инициализируем светодиоды
     leds_init();
 
