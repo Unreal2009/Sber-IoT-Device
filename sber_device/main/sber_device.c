@@ -14,6 +14,7 @@
 #include "fsm.h"
 #include "measuring.h"
 #include "csv.h"
+#include "wifi_connection.h"
 
 static const char *TAG = "Sber_Device";
 
@@ -29,7 +30,6 @@ void show_init()
 
 void app_main(void)
 {
-
     // Инициализируем светодиоды
     leds_init();
 
@@ -89,13 +89,27 @@ void app_main(void)
                 break;
 
             case FSM_WIFI_CONNECTING :
-                vTaskDelay(pdMS_TO_TICKS(2000));
-                fsm_set_state(FSM_UPLOADING);
+                if (wifi_connect())
+                {
+                    fsm_set_state(FSM_UPLOADING);
+                    csv_mount_fs();
+                }else
+                {
+                    fsm_set_state(FSM_ERROR);
+                }
                 break;
 
             case FSM_UPLOADING :
-                vTaskDelay(pdMS_TO_TICKS(3000));
-                fsm_set_state(FSM_IDLE);
+                if (wifi_send_csv_file())
+                {
+                    fsm_set_state(FSM_IDLE);
+                }else
+                {
+                    fsm_set_state(FSM_ERROR);
+                }
+
+                csv_unmount_fs();
+                wifi_disconnect();
                 break;
 
             case FSM_OTA_CHECKING_UPDATING :
