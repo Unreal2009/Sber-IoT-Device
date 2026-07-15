@@ -214,13 +214,18 @@ static void measuring_task(void *arg)
 
                     esp_err_t parse_ret = adc_continuous_parse_data(handle, result, ret_num, parsed_data, &num_parsed_samples);
                     if (parse_ret == ESP_OK) {
-                        measuring_data.data_size += num_parsed_samples;
                         for (int i = 0; i < num_parsed_samples; i++) {
                             if (parsed_data[i].valid) {
                                 // ESP_LOGI(TAG, "ADC%d, Channel: %d, Value: %"PRIu32,
                                 //          parsed_data[i].unit + 1,
                                 //          parsed_data[i].channel,
                                 //          parsed_data[i].raw_data);
+                                measuring_data.data[measuring_data.data_size++] = parsed_data[i].raw_data;
+                                if (measuring_data.data_size >= MEASURING_BUFFER_SIZE)
+                                {
+                                    measuring_running = 0;
+                                    break;
+                                }
                             } else {
                                 ESP_LOGW(TAG, "Invalid data [ADC%d_Ch%d_%"PRIu32"]",
                                          parsed_data[i].unit + 1,

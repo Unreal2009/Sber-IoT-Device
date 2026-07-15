@@ -34,10 +34,11 @@ void app_main(void)
     {
         ESP_LOGI(TAG, "Starting measuring");
         measuring_start();
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 15; i++)
         {
             ESP_LOGI(TAG, "Data size is %"PRIu32, measuring_get_current_data_size());
             vTaskDelay(pdMS_TO_TICKS(1000));
+            if (!measuring_is_runnig()) break;
         }
         measuring_stop();
         ESP_LOGI(TAG, "Stop measuring");
