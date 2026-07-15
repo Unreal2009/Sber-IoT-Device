@@ -5,7 +5,7 @@
 #include "esp_vfs_fat.h"
 #include "sdkconfig.h"
 
-#include "csv_worker.h"
+#include "csv.h"
 
 static const char *TAG = "csv_worker";
 
@@ -29,7 +29,7 @@ static size_t get_file_size(const char *path)
 }
 
 // Монтируем файловую систему
-int csv_worker_mount_fs()
+int csv_mount_fs()
 {
     // Монтируем файловую систему
     // ESP_LOGI(TAG, "Mounting FAT filesystem");
@@ -52,7 +52,7 @@ int csv_worker_mount_fs()
 }
 
 // Размонтируем файловую систему
-int csv_worker_unmount_fs()
+int csv_unmount_fs()
 {
     // Unmount FATFS
     // Можно не делать это - но незачем висеть ресурсам и при сбросе питания может все поломаться.
@@ -63,7 +63,7 @@ int csv_worker_unmount_fs()
 
 
 // Запись данных в CSV файл
-int csv_worker_create_file(measuring_data_t measuring_data)
+int csv_create_file(measuring_data_t measuring_data)
 {
     if (measuring_data.data_size == 0)
     {
@@ -71,7 +71,7 @@ int csv_worker_create_file(measuring_data_t measuring_data)
         return 0;
     }
 
-    if (!csv_worker_mount_fs())
+    if (!csv_mount_fs())
     {
         return 0;
     }
@@ -84,7 +84,7 @@ int csv_worker_create_file(measuring_data_t measuring_data)
     if (f == NULL) {
         perror("fopen"); // Print reason why fopen failed
         ESP_LOGE(TAG, "Failed to open file for writing");
-        csv_worker_unmount_fs();
+        csv_unmount_fs();
         return 0;
     }
 
@@ -100,15 +100,15 @@ int csv_worker_create_file(measuring_data_t measuring_data)
     ESP_LOGI(TAG, "CSV created");
     ESP_LOGI(TAG, "CSV size: %d bytes", get_file_size(filename));
 
-    csv_worker_unmount_fs();
+    csv_unmount_fs();
 
     return 1;
 }
 
 // Выводит в лог немного данных из файла
-int csv_worker_preview()
+int csv_preview()
 {
-    if (!csv_worker_mount_fs())
+    if (!csv_mount_fs())
     {
         return 0;
     }
@@ -117,7 +117,7 @@ int csv_worker_preview()
     if (f == NULL) {
         perror("fopen"); // Print reason why fopen failed
         ESP_LOGE(TAG, "Failed to open file for reading");
-        csv_worker_unmount_fs();
+        csv_unmount_fs();
         return 0;
     }
 
@@ -159,11 +159,11 @@ int csv_worker_preview()
 
     fclose(f);
 
-    csv_worker_unmount_fs();
+    csv_unmount_fs();
     return 1;
 }
 
-void csv_worker_test(void)
+void csv_test(void)
 {
     ESP_LOGI(TAG, "Mounting FAT filesystem");
     // To mount device we need name of device partition, define base_path

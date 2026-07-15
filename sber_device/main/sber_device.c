@@ -13,7 +13,7 @@
 #include "leds.h"
 #include "fsm.h"
 #include "measuring.h"
-#include "csv_worker.h"
+#include "csv.h"
 
 static const char *TAG = "Sber_Device";
 
@@ -42,9 +42,9 @@ void app_main(void)
         }
         measuring_stop();
 
-        csv_worker_create_file(measuring_get_data());
+        csv_create_file(measuring_get_data());
 
-        csv_worker_preview();
+        csv_preview();
 
         while (1)
         {

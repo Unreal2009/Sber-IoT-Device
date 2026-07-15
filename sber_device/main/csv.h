@@ -7,9 +7,9 @@
 // void csv_worker_test(void);
 
 // Запись данных в CSV файл
-int csv_worker_create_file(measuring_data_t measuring_data);
+int csv_create_file(measuring_data_t measuring_data);
 
 // Выводит в лог немного данных из файла
-int csv_worker_preview();
+int csv_preview();
 
 #endif //_CSV_WORKER_H_
