@@ -75,6 +75,7 @@ int wifi_connect()
 int wifi_disconnect()
 {
     ESP_ERROR_CHECK(example_disconnect());
+    ESP_LOGI(TAG, "Wi-Fi disconnect...");
     return 1;
 }
 

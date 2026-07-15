@@ -28,6 +28,11 @@ SSID и password Wi-Fi задаются в коде.
 Сервер живет [тут](http://sber-iot.dcn-rd.ru/)
 Загрузку новых прошивок надо делать через FTP
 
+Проверка работы загрузки CSV в PowerShell Windows
+```
+curl -F "csv_file=@C:\path\to\measurements.csv" http://192.168.1.50/upload.php
+```
+
 ![Дашборд сервреной части](doc/server.png)
 
 ## Памятка - настройка и сборка проекта
