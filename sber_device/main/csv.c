@@ -7,7 +7,7 @@
 
 #include "csv.h"
 
-static const char *TAG = "csv_worker";
+static const char *TAG = "csv";
 
 // Mount path for the partition
 const char *base_path = "/spiflash";

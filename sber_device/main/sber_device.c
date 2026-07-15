@@ -29,29 +29,6 @@ void show_init()
 
 void app_main(void)
 {
-    measuring_init();
-
-    while (1)
-    {
-        measuring_start();
-        for (int i = 0; i < 15; i++)
-        {
-            ESP_LOGI(TAG, "Data size is %"PRIu32, measuring_get_current_data_size());
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            if (!measuring_is_runnig()) break;
-        }
-        measuring_stop();
-
-        csv_create_file(measuring_get_data());
-
-        csv_preview();
-
-        while (1)
-        {
-            vTaskDelay(pdMS_TO_TICKS(1000));
-        }
-        vTaskDelay(pdMS_TO_TICKS(5000));
-    }
 
     // Инициализируем светодиоды
     leds_init();
@@ -61,6 +38,9 @@ void app_main(void)
 
     // Инициализация опроса кнопки
     button_init();
+
+    // Инициализация модуля измерения
+    measuring_init();
 
     vTaskDelay(pdMS_TO_TICKS(1000));
 
@@ -80,6 +60,7 @@ void app_main(void)
             case FSM_IDLE:
                 if (event == BTN_EVENT_SHORT)
                 {
+                    measuring_start();
                     fsm_set_state(FSM_MEASURING);
                 }else if (event == BTN_EVENT_LONG)
                 {
@@ -88,17 +69,23 @@ void app_main(void)
                 break;
 
             case FSM_MEASURING :
-                for (int i = 0; i < 1000; i++)
+                // Юзер хочет остановить измерение
+                if (event == BTN_EVENT_SHORT)
                 {
-                    vTaskDelay(pdMS_TO_TICKS(10));
-                    event = button_get_press();
-                    if (event == BTN_EVENT_SHORT)
-                    {
-                        ESP_LOGI(TAG, "Measure stoped by user");
-                        break;
-                    }
+                    measuring_stop();
                 }
-                fsm_set_state(FSM_WIFI_CONNECTING);
+
+                // Измерение закончено
+                // Делаем CSV файл и выводим превью
+                // Потом переходим к отправке на сервер
+                if (!measuring_is_runnig())
+                {
+                    csv_create_file(measuring_get_data());
+                    csv_preview();
+
+                    fsm_set_state(FSM_WIFI_CONNECTING);
+                    break;
+                }
                 break;
 
             case FSM_WIFI_CONNECTING :
