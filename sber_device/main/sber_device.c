@@ -13,6 +13,7 @@
 #include "leds.h"
 #include "fsm.h"
 #include "measuring.h"
+#include "csv_worker.h"
 
 static const char *TAG = "Sber_Device";
 
@@ -28,6 +29,19 @@ void show_init()
 
 void app_main(void)
 {
+
+    // Тестим файловую систему
+
+    ESP_LOGI(TAG, "Test file system");
+
+    csv_worker_test();
+
+    while (1)
+    {
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+
+
     measuring_init();
 
     while (1)
