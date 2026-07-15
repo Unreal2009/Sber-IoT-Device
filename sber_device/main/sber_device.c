@@ -29,19 +29,6 @@ void show_init()
 
 void app_main(void)
 {
-
-    // Тестим файловую систему
-
-    ESP_LOGI(TAG, "Test file system");
-
-    csv_worker_test();
-
-    while (1)
-    {
-        vTaskDelay(pdMS_TO_TICKS(10));
-    }
-
-
     measuring_init();
 
     while (1)
@@ -54,6 +41,10 @@ void app_main(void)
             if (!measuring_is_runnig()) break;
         }
         measuring_stop();
+
+        csv_worker_create_file(measuring_get_data());
+
+        csv_worker_preview();
 
         while (1)
         {
