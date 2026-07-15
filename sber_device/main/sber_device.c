@@ -14,7 +14,7 @@
 #include "fsm.h"
 #include "measuring.h"
 
-static const char *TAG = "example_sber_device";
+static const char *TAG = "Sber_Device";
 
 static const char firmware_version[] = "1.0.0";
 
@@ -32,7 +32,18 @@ void app_main(void)
 
     while (1)
     {
-        vTaskDelay(pdMS_TO_TICKS(100));
+        ESP_LOGI(TAG, "Starting measuring");
+        measuring_start();
+        for (int i = 0; i < 10; i++)
+        {
+            ESP_LOGI(TAG, "Data size is %"PRIu32, measuring_get_current_data_size());
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+        measuring_stop();
+        ESP_LOGI(TAG, "Stop measuring");
+        ESP_LOGI(TAG, "Total data size is %"PRIu32, measuring_get_current_data_size());
+
+        vTaskDelay(pdMS_TO_TICKS(5000));
     }
 
     // Инициализируем светодиоды
