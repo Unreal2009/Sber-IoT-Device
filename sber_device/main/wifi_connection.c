@@ -31,26 +31,32 @@ static esp_err_t send_csv_file_stream(void);
 // Подключение к WiFi
 int wifi_connect()
 {
-    // System initialization
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ret = nvs_flash_init();
-    }
+    static int is_init = 0;
 
-    if (ret != ESP_OK)
+    if (!is_init)
     {
-        return 0;
-    };
+        // System initialization
+        esp_err_t ret = nvs_flash_init();
+        if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+            ESP_ERROR_CHECK(nvs_flash_erase());
+            ret = nvs_flash_init();
+        }
 
-    if (esp_netif_init() != ESP_OK)
-    {
-        return 0;
-    };
+        if (ret != ESP_OK)
+        {
+            return 0;
+        };
 
-    if(esp_event_loop_create_default() != ESP_OK)
-    {
-        return 0;
+        if (esp_netif_init() != ESP_OK)
+        {
+            return 0;
+        };
+
+        if(esp_event_loop_create_default() != ESP_OK)
+        {
+            return 0;
+        }
+        is_init = 1;
     }
 
     ESP_LOGI(TAG, "Starting Wi-Fi connect...");
@@ -78,9 +84,12 @@ int wifi_send_csv_file()
     const char *boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW";
     const char *filename = "measurements.csv";
 
+    csv_mount_fs();
+
     FILE *f = fopen(FILE_PATH, "rb");
     if (!f) {
         ESP_LOGE(TAG, "Failed to open file %s", FILE_PATH);
+        csv_unmount_fs();
         return 0;
     }
 
@@ -101,6 +110,7 @@ int wifi_send_csv_file()
     if (!client) {
         ESP_LOGE(TAG, "Failed to init HTTP client");
         fclose(f);
+        csv_unmount_fs();
         return 0;
     }
 
@@ -122,6 +132,7 @@ int wifi_send_csv_file()
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Write header failed: %s", esp_err_to_name(err));
         fclose(f);
+        csv_unmount_fs();
         esp_http_client_cleanup(client);
         return 0;
     }
@@ -141,6 +152,7 @@ int wifi_send_csv_file()
         }
     }
     fclose(f);
+    csv_unmount_fs();
 
     // 3. Пишем конец multipart
     char footer_buf[128];

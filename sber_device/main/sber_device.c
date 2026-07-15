@@ -92,7 +92,6 @@ void app_main(void)
                 if (wifi_connect())
                 {
                     fsm_set_state(FSM_UPLOADING);
-                    csv_mount_fs();
                 }else
                 {
                     fsm_set_state(FSM_ERROR);
@@ -100,15 +99,15 @@ void app_main(void)
                 break;
 
             case FSM_UPLOADING :
-                if (wifi_send_csv_file())
-                {
-                    fsm_set_state(FSM_IDLE);
-                }else
-                {
-                    fsm_set_state(FSM_ERROR);
-                }
-
-                csv_unmount_fs();
+                vTaskDelay(pdMS_TO_TICKS(5000));
+                // if (wifi_send_csv_file())
+                // {
+                //     fsm_set_state(FSM_IDLE);
+                // }else
+                // {
+                //     fsm_set_state(FSM_ERROR);
+                // }
+                fsm_set_state(FSM_IDLE);
                 wifi_disconnect();
                 break;
 
