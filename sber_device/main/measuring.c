@@ -151,6 +151,16 @@ uint32_t measuring_is_runnig()
     return is_running;
 }
 
+// Получить информацию о конфигурации
+measuring_config_t measuring_get_config()
+{
+    measuring_config_t config = {
+        .sample_rate_hz = MEASURING_FREQ_HZ,
+        .buffer_size = MEASURING_BUFFER_SIZE,
+    };
+    return config;
+}
+
 void measuring_init()
 {
     // Запускаем задачу работы с ADC
@@ -188,6 +198,13 @@ static void measuring_task(void *arg)
             vTaskDelay(pdMS_TO_TICKS(10));
         }
 
+        ESP_LOGI(TAG, "Measurement started");
+
+        measuring_config_t cfg = measuring_get_config();
+        ESP_LOGI(TAG, "ADC sample rate: %d Hz", cfg.sample_rate_hz);
+        ESP_LOGI(TAG, "ADC buffer size: %d", cfg.buffer_size);
+
+
         ESP_ERROR_CHECK(adc_continuous_start(handle));
 
         while (measuring_running)
@@ -224,6 +241,8 @@ static void measuring_task(void *arg)
                                 if (measuring_data.data_size >= MEASURING_BUFFER_SIZE)
                                 {
                                     measuring_running = 0;
+                                    ESP_LOGI(TAG, "ADC samples collected %d", measuring_data.data_size);
+                                    ESP_LOGI(TAG, "Measurement stopped");
                                     break;
                                 }
                             } else {

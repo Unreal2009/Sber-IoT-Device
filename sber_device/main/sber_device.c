@@ -32,7 +32,6 @@ void app_main(void)
 
     while (1)
     {
-        ESP_LOGI(TAG, "Starting measuring");
         measuring_start();
         for (int i = 0; i < 15; i++)
         {
@@ -41,9 +40,11 @@ void app_main(void)
             if (!measuring_is_runnig()) break;
         }
         measuring_stop();
-        ESP_LOGI(TAG, "Stop measuring");
-        ESP_LOGI(TAG, "Total data size is %"PRIu32, measuring_get_current_data_size());
 
+        while (1)
+        {
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
 
