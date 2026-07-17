@@ -1,6 +1,7 @@
 #ifndef ESP_HTTP_CLIENT_WIFI_CONNECTION_H
 #define ESP_HTTP_CLIENT_WIFI_CONNECTION_H
 
+
 // Подключение к WiFi
 int wifi_connect();
 
