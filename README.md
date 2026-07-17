@@ -30,7 +30,8 @@ SSID и password Wi-Fi задаются в коде.
 
 Проверка работы загрузки CSV в PowerShell Windows
 ```
-curl -F "csv_file=@C:\path\to\measurements.csv" http://192.168.1.50/upload.php
+curl -X POST -H "Content-Type: text/csv" --data-binary @data.csv http://sber-iot.dcn-rd.ru/upload.php
+
 ```
 
 ![Дашборд сервреной части](doc/server.png)
