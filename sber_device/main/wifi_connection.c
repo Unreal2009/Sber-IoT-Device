@@ -32,7 +32,7 @@ static const char *TAG = "wifi_connection";
 static char output_buffer[MAX_HTTP_OUTPUT_BUFFER];
 
 // Буфер для чтения данных файла при отправке
-#define CHUNK_SIZE 1024
+#define CHUNK_SIZE 2048
 uint8_t chunk[CHUNK_SIZE];
 
 esp_err_t _http_event_handler(esp_http_client_event_t *evt);
@@ -115,8 +115,6 @@ int wifi_send_csv_file()
         .event_handler = _http_event_handler,
     };
 
-    esp_log_level_set(TAG, ESP_LOG_DEBUG);
-
     esp_http_client_handle_t client = esp_http_client_init(&config);
     if (!client) {
         ESP_LOGE(TAG, "Failed to init HTTP client");
@@ -139,29 +137,6 @@ int wifi_send_csv_file()
     ESP_LOGI(TAG, "Open HTTP connection OK");
 
     int return_code = 1;
-    // int wlen = esp_http_client_write(client, (const char *)test_str, strlen(test_str));
-    // if (wlen < 0)
-    // {
-    //     ESP_LOGE(TAG, "Write failed");
-    // }
-    // int content_length = esp_http_client_fetch_headers(client);
-    // if (content_length < 0)
-    // {
-    //     ESP_LOGE(TAG, "HTTP client fetch headers failed");
-    // }else
-    // {
-    //     int data_read = esp_http_client_read_response(client, output_buffer, MAX_HTTP_OUTPUT_BUFFER);
-    //     if (data_read >= 0)
-    //     {
-    //         ESP_LOGI(TAG, "HTTP POST Status = %d, content_length = %"PRId64,
-    //         esp_http_client_get_status_code(client),
-    //         esp_http_client_get_content_length(client));
-    //         ESP_LOG_BUFFER_HEX(TAG, output_buffer, strlen(output_buffer));
-    //     } else {
-    //         ESP_LOGE(TAG, "Failed to read response");
-    //     }
-    // }
-
 
     while (1) {
         size_t read_size = fread(chunk, 1, CHUNK_SIZE, f);
@@ -205,7 +180,6 @@ int wifi_send_csv_file()
     }
 
     cleanup:
-        esp_log_level_set(TAG, ESP_LOG_INFO);
         fclose(f);
         csv_unmount_fs();
         // esp_http_client_close(client);
