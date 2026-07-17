@@ -155,14 +155,15 @@ int wifi_send_csv_file()
             break;
         }
 
-        ESP_LOGI(TAG, "Read chunk: %zu bytes", read_size);
-
         int wlen = esp_http_client_write(client, (const char *)chunk, read_size);
         if (wlen < 0 )
         {
             ESP_LOGE(TAG, "Write chunk failed: %s", esp_err_to_name(err));
             return_code = 0;
             goto cleanup;
+        }else
+        {
+            ESP_LOGI(TAG, "Read chunk and send to server: %zu bytes", read_size);
         }
     }
 
