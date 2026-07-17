@@ -30,17 +30,6 @@ void show_init()
 
 void app_main(void)
 {
-    // if (wifi_connect())
-    // {
-    //     wifi_send_csv_file();
-    //     wifi_disconnect();
-    // }
-    //
-    // while (1)
-    // {
-    //     vTaskDelay(pdMS_TO_TICKS(1000));
-    // }
-
     // Инициализируем светодиоды
     leds_init();
 

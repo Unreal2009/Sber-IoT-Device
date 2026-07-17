@@ -91,10 +91,12 @@ int wifi_disconnect()
 // Отправка данных на сервер
 int wifi_send_csv_file()
 {
+    // Монтируем файловую систему
     if (!csv_mount_fs()) {
         return 0;
     }
 
+    // Открываем файл на чтение
     FILE *f = fopen(FILE_PATH, "rb");
     if (!f) {
         ESP_LOGE(TAG, "Failed to open file %s", FILE_PATH);
@@ -102,6 +104,8 @@ int wifi_send_csv_file()
         return 0;
     }
 
+    // ПОлучаем размер данных
+    // TODO Вынести эту ф-цию в утилиты
     fseek(f, 0, SEEK_END);
     size_t file_size = ftell(f);
     rewind(f);
@@ -115,6 +119,7 @@ int wifi_send_csv_file()
         .event_handler = _http_event_handler,
     };
 
+    // Инитим клиента
     esp_http_client_handle_t client = esp_http_client_init(&config);
     if (!client) {
         ESP_LOGE(TAG, "Failed to init HTTP client");
@@ -126,6 +131,8 @@ int wifi_send_csv_file()
     esp_err_t err = ESP_OK;
 
     esp_http_client_set_header(client, "Content-Type", "text/csv");
+
+    // Открываем соединение с сервером и отправляем хэдер
     err = esp_http_client_open(client, (int)file_size);
     if (err != ESP_OK)
     {
@@ -134,10 +141,12 @@ int wifi_send_csv_file()
         csv_unmount_fs();
         return 0;
     }
+
     ESP_LOGI(TAG, "Open HTTP connection OK");
 
     int return_code = 1;
 
+    // Читаем файл и отправляем на сервер
     while (1) {
         size_t read_size = fread(chunk, 1, CHUNK_SIZE, f);
         // Если файл закончился - выходим из цикла
@@ -157,6 +166,7 @@ int wifi_send_csv_file()
         }
     }
 
+    // Получаем ответ сервера
     int content_length = esp_http_client_fetch_headers(client);
     if (content_length < 0)
     {
@@ -179,6 +189,7 @@ int wifi_send_csv_file()
         }
     }
 
+    // Чистим все и выходит - Добби свободен :)
     cleanup:
         fclose(f);
         csv_unmount_fs();
